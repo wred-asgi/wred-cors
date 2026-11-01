@@ -47,11 +47,13 @@ async def test_preflight_checks_policy_without_dispatching(
             },
         )
     assert result.status_code == status
-    assert {v.strip().lower() for v in result.headers["vary"].split(",")} == {
+    # Upstream may add more cache dimensions (for example Private Network Access).
+    # Our contract requires these dimensions without discarding additional ones.
+    assert {
         "origin",
         "access-control-request-method",
         "access-control-request-headers",
-    }
+    } <= {v.strip().lower() for v in result.headers["vary"].split(",")}
     if status == 200:
         assert result.headers["access-control-allow-origin"] == ORIGIN
         assert result.headers["access-control-allow-credentials"] == "true"

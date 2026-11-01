@@ -8,7 +8,7 @@ from starlette.datastructures import MutableHeaders
 from starlette.middleware.cors import CORSMiddleware
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = ["cors_application"]
 
 _TOKEN = re.compile(r"[!#$%&'*+.^_`|~0-9A-Za-z-]+", re.ASCII)

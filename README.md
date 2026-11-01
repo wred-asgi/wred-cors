@@ -1,7 +1,7 @@
 # wred-cors
 
 Explicit CORS policy for Wred, using Starlette's ASGI CORS implementation.
-Requires Python 3.11+ and Wred 0.14. Wred's core remains unchanged.
+Requires Python 3.11+ and Wred 0.14–0.15. Wred's core remains unchanged.
 
 Install from GitHub:
 
@@ -98,3 +98,7 @@ Tests cover preflight policy, credentials, errors, protocol forwarding, and
 concurrent streaming. The load script runs real HTTP against two Uvicorn workers with 10,000 configured
 origins. Run `--mode raw`, `--mode cors`, and `--mode preflight` for comparison.
 It is a finite local check, not a production capacity guarantee or soak test.
+
+Version 0.2 requires Starlette >=1.3.1,<2. CI exercises both the minimum and latest
+compatible release; keep a reviewed dependency lock for deployment. Additional
+upstream `Vary` fields are preserved when needed for browser policy variants.
