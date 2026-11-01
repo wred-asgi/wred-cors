@@ -1,0 +1,37 @@
+name: Test and build
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+        starlette: [minimum, latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install '.[test]' build
+      - if: matrix.starlette == 'minimum'
+        run: python -m pip install starlette==0.52.1
+      - run: python -m pip check
+      - run: python -m pytest
+      - run: python -m build
+      - run: python -m pip install --force-reinstall --no-deps dist/*.whl
+      - name: Test installed wheel away from the source package
+        run: |
+          cp -r tests "$RUNNER_TEMP/cors-wheel-tests"
+          cd "$RUNNER_TEMP"
+          python -m pytest cors-wheel-tests --asyncio-mode=auto -o asyncio_default_fixture_loop_scope=function
+      - name: Exercise two HTTP workers
+        if: matrix.python == '3.14' && matrix.starlette == 'latest'
+        run: |
+          python benchmarks/load.py --mode cors --requests 2000 --concurrency 50
+          python benchmarks/load.py --mode preflight --requests 2000 --concurrency 50
